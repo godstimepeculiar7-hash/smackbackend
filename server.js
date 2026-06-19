@@ -491,85 +491,34 @@ app.post("/checkout/location", async (req, res) => {
     });
 });
 
-app.post('/payment/verify', async (req, res) => {
-    const { transaction_id } = req.body;
-    
+app.post('/create-order', (req, res) => {
 
-    try {
-        const response = await fetch(
-            `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`,
-            {
-                method: 'GET',
-                headers: {
-                    Authorization: process.env.FLUTTERWAVE_SECRET_KEY
-                }
-            }
-        );
+    const allProducts = [...riceProducts, ...swallow];
 
-        console.log(process.env.FLUTTERWAVE_SECRET_KEY);
+    const orderItems = cart.map(cartItem => {
 
-        const data = await response.json();
-
-        if (data.status === 'success' && data.data.status === 'successful') {
-
-            const allProducts = [...riceProducts, ...swallow];
-
-            const orderProducts = cart.map(item => {
-
-                const product = allProducts.find(
-                    p => p.id === item.productId
-                );
-
-                const deliveryOption = deliveryOptions.find(
-                    option => option.id === item.deliveryOptionId
-                );
-
-                // CALCULATE DELIVERY TIME
-                const deliveryDate = new Date(
-                    Date.now() + deliveryOption.deliveryHours * 60 * 60 * 1000
-                );
-
-                return {
-                    productId: item.productId,
-                    name: product.name,
-                    image: product.image,
-                    priceCents: product.priceCents,
-                    quantity: item.quantity,
-
-                    deliveryOptionId: item.deliveryOptionId,
-                    deliveryHours: deliveryOption.deliveryHours,
-
-                    // SAVE REAL DELIVERY TIME
-                    estimatedDelivery: deliveryDate
-                };
-            });
-
-            orders.unshift({
-                id: crypto.randomUUID(),
-                products: orderProducts,
-                createdAt: new Date(),
-                total: data.data.amount
-            });
-
-            cart = [];
-
-            return res.json({
-                success: true,
-                message: 'Payment verified'
-            });
-        }
-
-        res.status(400).json({
-            success: false,
-            message: 'Payment not verified'
+        const matchingProduct = allProducts.find(product => {
+            return product.id === cartItem.productId;
         });
 
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Server error'
-        });
-    }
+        return {
+            ...matchingProduct,
+            quantity: cartItem.quantity,
+            deliveryOptionId: cartItem.deliveryOptionId
+        };
+    });
+
+    orders.push({
+        id: crypto.randomUUID(),
+        orderDate: new Date(),
+        items: orderItems
+    });
+
+    cart = [];
+
+    res.json({
+        message: 'Order created successfully'
+    });
 });
 
 app.get('/orders', (req, res) => {

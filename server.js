@@ -509,11 +509,13 @@ app.post('/create-order', (req, res) => {
     });
 
     const totalQuantity = orderItems.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = orderItems.reduce((sum, item) => sum + (item.priceCents * item.quantity), 0);
 
     orders.push({
         id: crypto.randomUUID(),
         orderDate: new Date(),
         totalQuantity,
+        totalPrice,
         items: orderItems
     });
 

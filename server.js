@@ -1,14 +1,59 @@
 require('dotenv').config();
 const express = require('express');
+const mongoose = require('mongoose');
+const Product = require('./models/product');
+const RiceProduct = require('./models/riceProducts');
+const SwallowProduct = require('./models/swallowProducts');
 const cors = require('cors');
 
 const app = express();
+
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log('Connected to MongoDB');
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
+};
+
+connectDB();
 
 const PORT = process.env.PORT || 5000;
 
 
 app.use(express.json());
 app.use(cors());
+
+app.get('/products', async (req, res) => {
+    await Product.create({
+        name: "Coke",
+        price: 1000
+    })
+    const products = await Product.find();
+
+    res.json(products);
+});
+
+app.get('/swallow-products', async (req, res) => {
+    try{
+        const products = await SwallowProduct.find();
+
+        res.json(products);
+    } catch (error) {
+        console.log('Error fetching swallow products:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    } 
+})
+
+app.get('/rice-products', async (req, res) => {
+    await RiceProduct.insertMany(riceProducts);
+
+    const products = await RiceProduct.find();
+
+    res.json(products);
+});
 
 
 app.get('/', (req, res) => {

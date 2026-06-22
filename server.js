@@ -36,6 +36,17 @@ app.get('/products', async (req, res) => {
     res.json(products);
 });
 
+app.get('/rice-products', async (req, res) => {
+    try {
+        const products = await RiceProduct.find();
+
+        res.json(products);
+    } catch (error) {
+        console.error('Error fetching rice products:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.get('/swallow-products', async (req, res) => {
     try{
         const products = await SwallowProduct.find();
@@ -47,13 +58,7 @@ app.get('/swallow-products', async (req, res) => {
     } 
 })
 
-app.get('/rice-products', async (req, res) => {
-    await RiceProduct.insertMany(riceProducts);
 
-    const products = await RiceProduct.find();
-
-    res.json(products);
-});
 
 
 app.get('/', (req, res) => {

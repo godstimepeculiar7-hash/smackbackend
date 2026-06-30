@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Product = require('./models/product');
 const RiceProduct = require('./models/riceProducts');
 const SwallowProduct = require('./models/swallowProducts');
+const Cart = require('./models/cart');
 const cors = require('cors');
 
 const app = express();
@@ -48,14 +49,14 @@ app.get('/rice-products', async (req, res) => {
 });
 
 app.get('/swallow-products', async (req, res) => {
-    try{
+    try {
         const products = await SwallowProduct.find();
 
         res.json(products);
     } catch (error) {
         console.log('Error fetching swallow products:', error);
         res.status(500).json({ error: 'Internal server error' });
-    } 
+    }
 })
 
 
@@ -329,21 +330,62 @@ app.get('/swallow', (req, res) => {
 let cart = [];
 let orders = [];
 
-app.post('/cart', (req, res) => {
-    const { productId } = req.body;
+// Add a product to cart
+app.post('/cart', async (req, res) => {
+    try {
+        // Get sessionId and productId from request body
+        const { sessionId, productId } = req.body;
 
-    const existingItems = cart.find(cartItem => cartItem.productId === productId)
+        // Look for a cart that belongs to this session
+        let cart = await Cart.findOne({ sessionId });
+        let item;
 
-    if (existingItems) {
-        existingItems.quantity += 1;
-    } else {
-        cart.push({
-            productId,
-            quantity: 1,
-            deliveryOptionId: '1'
+        if (!cart) {
+
+            // Create a new cart
+            cart = new Cart({
+                // This cart belongs to this user
+                sessionId,
+
+                // Add the first product to the cart
+                items: [{
+                    product: productId,
+                    quantity: 1
+                }]
+            });
+        } else {
+            // Look for this product inside the cart
+            item = cart.items.find((item) => {
+                return item.product.toString() === productId;
+            });
+
+            // If product already exists in the cart
+            if (item) {
+                item.quantity += 1;
+            } else {
+                // Add the product to the cart
+                cart.items.push({
+                    product: productId,
+                    quantity: 1
+                });
+            }
+        }
+
+
+
+        // Save changes to MongoDB
+        await cart.save();
+
+        // Send the updated cart back to the frontend
+        res.json(cart);
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            message: 'Something went wrong'
         });
-    };
-    res.json(cart);
+    }
+
 });
 
 // The code below calculates the total quantiy of the cart

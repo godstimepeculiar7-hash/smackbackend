@@ -390,16 +390,41 @@ app.post('/cart', async (req, res) => {
 
 // The code below calculates the total quantiy of the cart
 
-app.get('/cart-quantity', (req, res) => {
+app.get('/cart-quantity', async (req, res) => {
+    try {
+        // Get the sessionId that the frontend sent in the URL
+        const { sessionId } = req.query;
+        console.log('Session ID:', sessionId);
 
-    const total = cart.reduce((sum, cartItem) => {
-        return sum + cartItem.quantity
-    }, 0);
+        // Find the cart that belongs to this session
+        const cart = await Cart.findOne({ sessionId });
+        console.log('Cart:', cart);
 
-    res.json({ total });
-});
+        // If no cart exists, return 0
+        if (!cart) {
+            return res.json({
+                totalQuantity: 0
+            })
+        }
 
-// 
+        // Add together the quantity of every item in the cart
+        const totalQuantity = cart.items.reduce((total, item) => {
+            return total + item.quantity;
+        }, 0);
+
+        // Send the total quantity back to the frontend
+        res.json({
+            totalQuantity
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: 'Something went wrong'
+        })
+    }
+})
+
 
 app.get('/cart', (req, res) => {
     const allProducts = [...riceProducts, ...swallow];

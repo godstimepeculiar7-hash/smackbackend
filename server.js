@@ -173,8 +173,7 @@ app.get('/checkout', async (req, res) => {
             })
         }
 
-        console.log(cart);
-
+        console.log(cart.items[0].productId);
         res.json({
             items: cart.items
         })

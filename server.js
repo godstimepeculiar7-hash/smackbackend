@@ -164,15 +164,20 @@ app.get('/checkout', async (req, res) => {
 
         // Find the cart that belongs to this session
         const cart = await Cart.findOne({ sessionId }).populate('items.productId');
-        console.log(cart);
 
         // If the user has not cart yet,
         // return an empty list of items
-        if(!cart) {
+        if (!cart) {
             return res.json({
                 items: []
             })
-        } 
+        }
+
+        console.log(cart);
+
+        res.json({
+            items: cart.items
+        })
     } catch (error) {
         console.log(error);
 

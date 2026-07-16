@@ -16,7 +16,7 @@ const cartSchema = new mongoose.Schema({
         {
             // Store the id of the product
             // this id refers to a document in the Products collection
-            product: {
+            productId: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'riceProducts',
                 required: true

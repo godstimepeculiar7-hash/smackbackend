@@ -349,7 +349,7 @@ app.post('/cart', async (req, res) => {
 
                 // Add the first product to the cart
                 items: [{
-                    product: productId,
+                    productId,
                     quantity: 1,
                     deliveryOptionId: 1
                 }]
@@ -357,7 +357,7 @@ app.post('/cart', async (req, res) => {
         } else {
             // Look for this product inside the cart
             item = cart.items.find((item) => {
-                return item.product.toString() === productId;
+                return item.productId.toString() === productId;
             });
 
             // If product already exists in the cart
@@ -366,7 +366,7 @@ app.post('/cart', async (req, res) => {
             } else {
                 // Add the product to the cart
                 cart.items.push({
-                    product: productId,
+                    productId,
                     quantity: 1,
                     deliveryOptionId: 1
                 });

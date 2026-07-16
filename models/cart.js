@@ -18,7 +18,12 @@ const cartSchema = new mongoose.Schema({
             // this id refers to a document in the Products collection
             productId: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'riceProducts',
+                refpath: 'productModel',
+                required: true
+            },
+
+            productModel: {
+                type: String,
                 required: true
             },
 
@@ -31,7 +36,7 @@ const cartSchema = new mongoose.Schema({
                 // Prevent quantiry from becoming 0 or negative
                 min: 1
 
-            }, 
+            },
 
             // Store the delivery Option for the product
             deliveryOptionId: {

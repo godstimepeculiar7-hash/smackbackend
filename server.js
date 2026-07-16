@@ -350,7 +350,8 @@ app.post('/cart', async (req, res) => {
                 // Add the first product to the cart
                 items: [{
                     product: productId,
-                    quantity: 1
+                    quantity: 1,
+                    deliveryOptionId: 1
                 }]
             });
         } else {
@@ -366,7 +367,8 @@ app.post('/cart', async (req, res) => {
                 // Add the product to the cart
                 cart.items.push({
                     product: productId,
-                    quantity: 1
+                    quantity: 1,
+                    deliveryOptionId: 1
                 });
             }
         }

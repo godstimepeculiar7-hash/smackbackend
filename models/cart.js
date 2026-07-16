@@ -31,6 +31,13 @@ const cartSchema = new mongoose.Schema({
                 // Prevent quantiry from becoming 0 or negative
                 min: 1
 
+            }, 
+
+            // Store the delivery Option for the product
+            deliveryOptionId: {
+                type: Number,
+                // if deliveryOption is not provided, use 1 as the default value
+                default: 1
             }
         }
     ]

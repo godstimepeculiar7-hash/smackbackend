@@ -8,6 +8,6 @@ const swallowProductsSchema = new mongoose.Schema({
     image: String
 });
 
-const SwallowProduct = mongoose.model('SwallowProducts', swallowProductsSchema);
+const SwallowProduct = mongoose.model('swallowProducts', swallowProductsSchema);
 
 module.exports = SwallowProduct;

@@ -24,7 +24,8 @@ const cartSchema = new mongoose.Schema({
 
             productModel: {
                 type: String,
-                required: true
+                required: true,
+                enum: ['riceProducts', 'swallowProducts']
             },
 
             // Store how many of the product the user wants to buy

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const riceProductSchema = new mongoose.Schema({
     name: String,
+    productModel: String,
     priceCents: Number,
     kg: String,
     image: String

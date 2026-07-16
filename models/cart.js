@@ -18,7 +18,7 @@ const cartSchema = new mongoose.Schema({
             // this id refers to a document in the Products collection
             productId: {
                 type: mongoose.Schema.Types.ObjectId,
-                refpath: 'productModel',
+                refPath: 'productModel',
                 required: true
             },
 

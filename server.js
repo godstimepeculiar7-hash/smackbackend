@@ -1,9 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const Product = require('./models/product');
-const RiceProduct = require('./models/riceProducts');
-const SwallowProduct = require('./models/swallowProducts');
+const Product = require('./models/products');
 const Cart = require('./models/cart');
 const cors = require('cors');
 
@@ -27,9 +25,9 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
-app.get('/rice-products', async (req, res) => {
+app.get('/products', async (req, res) => {
     try {
-        const products = await RiceProduct.find();
+        const products = await Product.find();
 
         res.json(products);
     } catch (error) {
@@ -38,22 +36,6 @@ app.get('/rice-products', async (req, res) => {
     }
 });
 
-app.get('/swallow-products', async (req, res) => {
-    try {
-        const products = await SwallowProduct.find();
-
-        res.json(products);
-    } catch (error) {
-        console.log('Error fetching swallow products:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-})
-
-app.get('/', (req, res) => {
-    res.json({
-        message: 'Smack backend is live!'
-    });
-});
 
 // This code below is the Add to cart logic
 
@@ -186,8 +168,6 @@ app.get('/checkout', async (req, res) => {
         })
     }
 });
-
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

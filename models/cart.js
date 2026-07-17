@@ -18,14 +18,8 @@ const cartSchema = new mongoose.Schema({
             // this id refers to a document in the Products collection
             productId: {
                 type: mongoose.Schema.Types.ObjectId,
-                refPath: 'productModel',
+                ref: 'products',
                 required: true
-            },
-
-            productModel: {
-                type: String,
-                required: true,
-                enum: ['riceProducts', 'swallowProducts']
             },
 
             // Store how many of the product the user wants to buy

@@ -46,7 +46,7 @@ let orders = [];
 app.post('/cart', async (req, res) => {
     try {
         // Get sessionId and productId from request body
-        const { sessionId, productId, productModel } = req.body;
+        const { sessionId, productId } = req.body;
 
         // Look for a cart that belongs to this session
         let cart = await Cart.findOne({ sessionId });
@@ -62,7 +62,6 @@ app.post('/cart', async (req, res) => {
                 // Add the first product to the cart
                 items: [{
                     productId,
-                    productModel,
                     quantity: 1,
                     deliveryOptionId: 1
                 }]
@@ -80,7 +79,6 @@ app.post('/cart', async (req, res) => {
                 // Add the product to the cart
                 cart.items.push({
                     productId,
-                    productModel,
                     quantity: 1,
                     deliveryOptionId: 1
                 });

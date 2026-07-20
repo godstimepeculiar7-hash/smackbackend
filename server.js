@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Product = require('./models/products');
 const Cart = require('./models/cart');
 const cors = require('cors');
+const deliveryOptions = require('./data/deliveryOptions');
 
 const app = express();
 
@@ -166,6 +167,11 @@ app.get('/checkout', async (req, res) => {
         })
     }
 });
+
+// This code below is the delivery options logic
+app.get('/delivery-options', (req, res) => {
+    res.json(deliveryOptions);
+})
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

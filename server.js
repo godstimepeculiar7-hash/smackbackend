@@ -213,6 +213,12 @@ app.put('/cart/delivery-option', async (req, res) => {
             message: 'Something went wrong'
         })
     }
+
+    res.json({
+        message: 'Delivery option updated successfully'
+    })
+
+
 })
 
 app.listen(PORT, () => {

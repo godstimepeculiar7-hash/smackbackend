@@ -206,6 +206,9 @@ app.put('/cart/delivery-option', async (req, res) => {
         // Save changes to MongoDB
         await cart.save();
 
+        res.json({
+            message: 'Delivery option updated successfully'
+        })
 
     } catch (error) {
         console.log(error);
@@ -214,9 +217,7 @@ app.put('/cart/delivery-option', async (req, res) => {
         })
     }
 
-    res.json({
-        message: 'Delivery option updated successfully'
-    })
+
 
 
 })

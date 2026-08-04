@@ -222,6 +222,51 @@ app.put('/cart/delivery-option', async (req, res) => {
 
 })
 
+app.put('/update-quantity', async (req, res) => {
+    try {
+        const { sessionId, productId, quantity } = req.body;
+
+        // Find the cart that belongs to this session
+        const cart = await Cart.findOne({ sessionId });
+
+        // checks if the cart exists
+        if (!cart) {
+            return res.status(404).json({
+                message: 'Cart not found'
+            })
+        }
+
+        // find the item in the cart that matches the productId
+        const item = cart.items.find((item) => {
+            return item.productId.toString() === productId;
+        })
+
+        // checks if the item exists
+        if(!item) {
+            return res.status(404).json({
+                message: 'Item not found in the Cart'
+            })
+        }
+        // updating the quantity for this item
+        item.quantity = quantity;
+
+        // save changes to MongoDB
+        await cart.save();
+
+        res.json({
+            message: 'Quantity updated successfully'
+        })
+
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: 'Something went wrong'
+        })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

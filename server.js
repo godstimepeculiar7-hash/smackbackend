@@ -242,7 +242,7 @@ app.put('/update-quantity', async (req, res) => {
         })
 
         // checks if the item exists
-        if(!item) {
+        if (!item) {
             return res.status(404).json({
                 message: 'Item not found in the Cart'
             })
@@ -259,6 +259,39 @@ app.put('/update-quantity', async (req, res) => {
 
 
 
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: 'Something went wrong'
+        })
+    }
+})
+
+app.delete('/cart', async (req, res) => {
+    try {
+        const { sessionId, productId } = req.body;
+
+        // Find the cart that belongs to this session
+        const cart = await Cart.findOne({ sessionId });
+
+        // checks if the cart exists
+        if (!cart) {
+            return res.status(404).json({
+                message: 'Cart not found'
+            })
+        }
+
+        // find the item in the cart that matches the productId, and deleting it from the cart
+        cart.items = cart.items.filter((item) => {
+            return item.productId.toString() !== productId;
+        });
+
+        // save changes to MongoDB
+        await cart.save();
+
+        res.json({
+            message: 'Item removed successfully'
+        })
     } catch (error) {
         console.log(error);
         res.status(500).json({

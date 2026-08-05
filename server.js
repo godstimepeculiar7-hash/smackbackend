@@ -300,6 +300,56 @@ app.delete('/cart', async (req, res) => {
     }
 })
 
+app.get('/payment-summary', async (req, res) => {
+    try {
+        const { sessionId } = req.query;
+
+        // Find the cart that belongs to this session
+        const cart = await Cart.findOne({ sessionId }).populate('items.productId');
+
+        // checks if the cart exists
+        if (!cart) {
+            return res.status(404).json({
+                message: 'Cart not found'
+            })
+        }
+
+        const itemsTotal = cart.items.reduce((total, item) => {
+            return total + (item.productId.priceCents * item.quantity)
+        }, 0);
+
+        const shippingTotal = cart.items.reduce((total, item) => {
+            const deliveryOption = deliveryOptions.find((deliveryOption) => {
+                return deliveryOption.id === item.deliveryOptionId;
+            });
+            return total + (deliveryOption?.priceCents || 0)
+        }, 0);
+
+        const totalBeforeTax = itemsTotal + shippingTotal;
+
+        const TAX_RATE = 0.1; // 10% tax rate
+
+        const tax = totalBeforeTax * TAX_RATE;
+
+        const totalCost = totalBeforeTax + tax;
+
+        res.json({
+            itemsTotal,
+            shippingTotal,
+            totalBeforeTax,
+            tax,
+            totalCost
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            message: 'Something went wrong'
+        });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

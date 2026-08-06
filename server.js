@@ -6,6 +6,7 @@ const Cart = require('./models/cart');
 const cors = require('cors');
 const deliveryOptions = require('./data/deliveryOptions');
 const axios = require('axios');
+const geolib = require('geolib');
 
 const app = express();
 
@@ -355,9 +356,21 @@ app.post('/checkout/location', async (req, res) => {
     try {
         const { sessionId, latitude, longitude } = req.body;
 
-        console.log(sessionId);
-        console.log(latitude);
-        console.log(longitude);
+        // Customers location
+        const customerLocation = {
+            latitude,
+            longitude
+        }
+
+        // Restaurants location
+        const restaurantLocation = {
+            latitude: 4.878224,
+            longitude: 7.133631
+        };
+
+        // calculate the distance between the restaurant and the user's location
+        const distance = geolib.getDistance(customerLocation, restaurantLocation);
+        console.log(distance);
 
         return res.json({
             message: 'Location received successfully'

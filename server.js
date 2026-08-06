@@ -27,6 +27,30 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
+const calculateCartSummary = (cart) => {
+    const itemsTotal = (cart?.items || []).reduce((total, item) => {
+        const priceCents = item?.productId?.priceCents ?? 0;
+        return total + (priceCents * (item?.quantity || 1));
+    }, 0);
+
+    const shippingTotal = (cart?.items || []).reduce((total, item) => {
+        const deliveryOption = deliveryOptions.find((option) => option.id === item?.deliveryOptionId);
+        return total + ((deliveryOption?.priceCents || 0) * (item?.quantity || 1));
+    }, 0);
+
+    const totalBeforeTax = itemsTotal + shippingTotal;
+    const tax = totalBeforeTax * 0.1;
+    const totalCost = totalBeforeTax + tax;
+
+    return {
+        itemsTotal,
+        shippingTotal,
+        totalBeforeTax,
+        tax,
+        totalCost
+    };
+};
+
 app.get('/products', async (req, res) => {
     try {
         const products = await Product.find();
@@ -315,32 +339,9 @@ app.get('/payment-summary', async (req, res) => {
             })
         }
 
-        const itemsTotal = cart.items.reduce((total, item) => {
-            return total + (item.productId.priceCents * item.quantity)
-        }, 0);
+        const summary = calculateCartSummary(cart);
 
-        const shippingTotal = cart.items.reduce((total, item) => {
-            const deliveryOption = deliveryOptions.find((deliveryOption) => {
-                return deliveryOption.id === item.deliveryOptionId;
-            });
-            return total + (deliveryOption?.priceCents || 0)
-        }, 0);
-
-        const totalBeforeTax = itemsTotal + shippingTotal;
-
-        const TAX_RATE = 0.1; // 10% tax rate
-
-        const tax = totalBeforeTax * TAX_RATE;
-
-        const totalCost = totalBeforeTax + tax;
-
-        res.json({
-            itemsTotal,
-            shippingTotal,
-            totalBeforeTax,
-            tax,
-            totalCost
-        });
+        res.json(summary);
 
     } catch (error) {
         console.log(error);
@@ -366,24 +367,14 @@ app.post('/create-payment', async (req, res) => {
             });
         }
 
-        const itemsTotal = cart.items.reduce((total, item) => {
-            return total + (item.productId.priceCents * item.quantity)
-        }, 0);
+        const summary = calculateCartSummary(cart);
+        const { totalCost } = summary;
 
-        const shippingTotal = cart.items.reduce((total, item) => {
-            const deliveryOption = deliveryOptions.find((deliveryOption) => {
-                return deliveryOption.id === item.deliveryOptionId;
+        if (!process.env.FLW_SECRET_KEY) {
+            return res.status(500).json({
+                message: 'Payment provider is not configured'
             });
-            return total + (deliveryOption?.priceCents || 0)
-        }, 0);
-
-        const totalBeforeTax = itemsTotal + shippingTotal;
-
-        const TAX_RATE = 0.1; // 10% tax rate
-
-        const tax = totalBeforeTax * TAX_RATE;
-
-        const totalCost = totalBeforeTax + tax;
+        }
 
         const tx_ref = `SMACK-${Date.now()}`;
 
@@ -417,8 +408,9 @@ app.post('/create-payment', async (req, res) => {
 
     } catch (error) {
         console.log(error);
+        console.log(error.response?.data);
         res.status(500).json({
-            message: 'Something went wrong'
+            message: error.response?.data?.message || 'Something went wrong'
         });
     }
 });

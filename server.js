@@ -373,7 +373,8 @@ app.post('/checkout/location', async (req, res) => {
         console.log(distance);
 
         return res.json({
-            message: 'Location received successfully'
+            message: 'Location received successfully',
+            distance
         });
 
     } catch (error) {

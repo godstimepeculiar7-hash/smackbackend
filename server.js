@@ -351,6 +351,26 @@ app.get('/payment-summary', async (req, res) => {
     }
 });
 
+app.post('/checkout/location', async (req, res) => {
+    try {
+        const { sessionId, latitude, longitude } = req.body;
+
+        console.log(sessionId);
+        console.log(latitude);
+        console.log(longitude);
+
+        return res.json({
+            message: 'Location received successfully'
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: 'Something went wrong'
+        });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

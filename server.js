@@ -5,6 +5,7 @@ const Product = require('./models/products');
 const Cart = require('./models/cart');
 const cors = require('cors');
 const deliveryOptions = require('./data/deliveryOptions');
+const axios = require('axios');
 
 const app = express();
 
@@ -344,6 +345,78 @@ app.get('/payment-summary', async (req, res) => {
     } catch (error) {
         console.log(error);
 
+        res.status(500).json({
+            message: 'Something went wrong'
+        });
+    }
+});
+
+// The code below is creates the payment
+app.post('/create-payment', async (req, res) => {
+    try {
+        const { sessionId } = req.body;
+
+        // Find the cart that belongs to this session
+        const cart = await Cart.findOne({ sessionId }).populate('items.productId');
+
+        // checks if the cart exists
+        if (!cart) {
+            return res.status(404).json({
+                message: 'Cart not found'
+            });
+        }
+
+        const itemsTotal = cart.items.reduce((total, item) => {
+            return total + (item.productId.priceCents * item.quantity)
+        }, 0);
+
+        const shippingTotal = cart.items.reduce((total, item) => {
+            const deliveryOption = deliveryOptions.find((deliveryOption) => {
+                return deliveryOption.id === item.deliveryOptionId;
+            });
+            return total + (deliveryOption?.priceCents || 0)
+        }, 0);
+
+        const totalBeforeTax = itemsTotal + shippingTotal;
+
+        const TAX_RATE = 0.1; // 10% tax rate
+
+        const tax = totalBeforeTax * TAX_RATE;
+
+        const totalCost = totalBeforeTax + tax;
+
+        const tx_ref = `SMACK-${Date.now()}`;
+
+        const flutterwaveResponse = await axios.post(
+            'https://api.flutterwave.com/v3/payments',
+            {
+                tx_ref,
+                amount: totalCost,
+                currency: 'NGN',
+                redirect_url: 'http://localhost:5173/payment-success',
+                customer: {
+                    email: 'customer@example.com',
+                    name: 'Customer'
+                },
+                customizations: {
+                    title: 'SMACK Restaurant',
+                    description: 'Food Order Payment'
+                }
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`
+                }
+            }
+        );
+
+        return res.json({
+            paymentLink: flutterwaveResponse.data.data.link
+        });
+
+
+    } catch (error) {
+        console.log(error);
         res.status(500).json({
             message: 'Something went wrong'
         });

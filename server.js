@@ -372,10 +372,22 @@ app.post('/checkout/location', async (req, res) => {
         const distance = geolib.getDistance(customerLocation, restaurantLocation);
         console.log(distance);
 
+        const MAX_DELIVERY_DISTANCE = 5000; // 5 KILOMETERS
+
+        if (distance > MAX_DELIVERY_DISTANCE) {
+            return res.status(400).json({
+                success: false,
+                message: 'Sorry, you are outside our delivery area.',
+                distance
+            })
+        }
+
         return res.json({
-            message: 'Location received successfully',
+            success: true,
+            message: 'You are within our delivery area.',
             distance
-        });
+        })
+
 
     } catch (error) {
         console.log(error);

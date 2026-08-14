@@ -362,6 +362,21 @@ app.post('/checkout/location', async (req, res) => {
             longitude
         }
 
+        // Making a backend request to Nomimatim API to get the address of the customer based on their latitude and longitude
+        const geocodingResponse = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+            params: {
+                format: 'jsonv2',
+                lat: latitude,
+                lon: longitude
+            },
+
+            headers: {
+                'User-Agent': 'SMACK Resturant App'
+            }
+        });
+
+        const address = geocodingResponse.data.display_name;
+
         // Restaurants location
         const restaurantLocation = {
             latitude: 4.878224,
@@ -378,15 +393,25 @@ app.post('/checkout/location', async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: 'Sorry, you are outside our delivery area.',
-                distance
-            })
+                distance,
+                location: {
+                    latitude,
+                    longitude,
+                    address
+                }
+            });
         }
 
         return res.json({
             success: true,
             message: 'You are within our delivery area.',
-            distance
-        })
+            distance,
+            location: {
+                latitude,
+                longitude,
+                address
+            }
+        });
 
 
     } catch (error) {

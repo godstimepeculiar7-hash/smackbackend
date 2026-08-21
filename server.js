@@ -422,6 +422,82 @@ app.post('/checkout/location', async (req, res) => {
     }
 });
 
+app.post('/create-payment', async (req, res) => {
+    try {
+        const { sessionId, latitude, longitude } = req.body;
+
+
+        // Customer's location
+        const customerLocation = {
+            latitude,
+            longitude
+        };
+
+        // Restaurant's location
+        const restaurantLocation = {
+            latitude: 4.878224,
+            longitude: 7.133631
+        };
+
+        // Calculate the distance between the customer and restaurant
+        const distance = geolib.getDistance(
+            customerLocation,
+            restaurantLocation
+        );
+
+        const MAX_DELIVERY_DISTANCE = 5000; // 5 kilometers
+
+        // Stop the payment if the customer is outside our delivery area
+        if (distance > MAX_DELIVERY_DISTANCE) {
+            return res.status(400).json({
+                success: false,
+                message: 'Sorry, you are outside our delivery area.',
+                distance
+            });
+        }
+
+        // Find the cart that belongs to this session
+        const cart = await Cart.findOne({ sessionId }).populate('items.productId');
+
+        // checks if the cart exists
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cart not found'
+            });
+        }
+
+        const itemsTotal = cart.items.reduce((total, item) => {
+            return total + (item.productId.priceCents * item.quantity)
+        }, 0);
+
+        const shippingTotal = cart.items.reduce((total, item) => {
+            const deliveryOption = deliveryOptions.find((deliveryOption) => {
+                return deliveryOption.id === item.deliveryOptionId;
+            });
+            return total + (deliveryOption?.priceCents || 0)
+        }, 0);
+
+        const totalBeforeTax = itemsTotal + shippingTotal;
+
+        const TAX_RATE = 0.1; // 10% tax rate
+
+        const tax = totalBeforeTax * TAX_RATE;
+
+        const totalCost = totalBeforeTax + tax;
+
+        res.json({
+            totalCost
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: 'Something went wrong'
+        });
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

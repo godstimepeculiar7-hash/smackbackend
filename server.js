@@ -486,8 +486,35 @@ app.post('/create-payment', async (req, res) => {
 
         const totalCost = totalBeforeTax + tax;
 
+        const tx_ref = `SMACK-${Date.now()}`;
+
+        const flutterwaveResponse = await axios.post(
+            'https://api.flutterwave.com/v3/payments',
+            {
+                tx_ref,
+                amount: totalCost,
+                currency: 'NGN',
+                redirect_url: 'http://localhost:5173/payment-success',
+                customer: {
+                    email: 'customer@example.com',
+                    name: 'Customer'
+                },
+                customizations: {
+                    title: 'SMACK Restaurant',
+                    description: 'Food Order Payment'
+                }
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
         res.json({
-            totalCost
+            success: true,
+            paymentLink: flutterwaveResponse.data.data.link
         });
 
     } catch (error) {

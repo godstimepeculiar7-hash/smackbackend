@@ -387,7 +387,7 @@ app.post('/checkout/location', async (req, res) => {
         const distance = geolib.getDistance(customerLocation, restaurantLocation);
         console.log(distance);
 
-        const MAX_DELIVERY_DISTANCE = 5000; // 5 KILOMETERS
+        const MAX_DELIVERY_DISTANCE = 10000; // 10 KILOMETERS
 
         if (distance > MAX_DELIVERY_DISTANCE) {
             return res.status(400).json({
@@ -445,7 +445,7 @@ app.post('/create-payment', async (req, res) => {
             restaurantLocation
         );
 
-        const MAX_DELIVERY_DISTANCE = 5000; // 5 kilometers
+        const MAX_DELIVERY_DISTANCE = 10000; // 10 kilometers
 
         // Stop the payment if the customer is outside our delivery area
         if (distance > MAX_DELIVERY_DISTANCE) {

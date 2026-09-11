@@ -422,6 +422,17 @@ app.post('/checkout/location', async (req, res) => {
     }
 });
 
+app.post('/create-payment', async (req, res) => {
+    try {
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: 'Something went wrong'
+        });
+    }
+})
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

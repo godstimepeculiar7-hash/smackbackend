@@ -443,18 +443,37 @@ app.post('/create-payment', async (req, res) => {
 
         const MAX_DELIVERY_DISTANCE = 5000; // 5 kilometers
 
+        const addressResponse = await axios.get(
+            'https://nominatim.openstreetmap.org/reverse',
+            {
+                params: {
+                    lat: latitude,
+                    lon: longitude,
+                    format: 'jsonv2',
+                    addressdetails: 1
+                },
+                headers: {
+                    'User-Agent': 'SMACK Restaurant'
+                }
+            }
+        );
+
+        const deliveryAddress = addressResponse.data.display_name;
+
         if (distance > MAX_DELIVERY_DISTANCE) {
             return res.status(400).json({
                 success: false,
                 message: 'Sorry, you are outside our delivery area.',
-                distance
+                distance,
+                deliveryAddress
             })
         };
 
         res.json({
             success: true,
             message: 'You are within our delivery area.',
-            distance
+            distance,
+            deliveryAddress
         });
 
     } catch (error) {

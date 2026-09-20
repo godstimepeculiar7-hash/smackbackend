@@ -424,7 +424,39 @@ app.post('/checkout/location', async (req, res) => {
 
 app.post('/create-payment', async (req, res) => {
     try {
-        
+        const { sessionId, latitude, longitude } = req.body;
+
+        // customers location
+        const customerLocation = {
+            latitude,
+            longitude
+        };
+
+        // restaurants location
+        const restaurantLocation = {
+            latitude: 4.877813360415394,
+            longitude: 7.132952740989614
+        };
+
+        // calculates the distance between the customers location from the restaurants location
+        const distance = geolib.getDistance(customerLocation, restaurantLocation);
+
+        const MAX_DELIVERY_DISTANCE = 5000; // 5 kilometers
+
+        if (distance > MAX_DELIVERY_DISTANCE) {
+            return res.status(400).json({
+                success: false,
+                message: 'Sorry, you are outside our delivery area.',
+                distance
+            })
+        };
+
+        res.json({
+            success: true,
+            message: 'You are within our delivery area.',
+            distance
+        });
+
     } catch (error) {
         console.log(error);
         res.status(500).json({

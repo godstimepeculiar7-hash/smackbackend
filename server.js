@@ -434,8 +434,8 @@ app.post('/create-payment', async (req, res) => {
 
         // restaurants location
         const restaurantLocation = {
-            latitude: 6.4474,
-            longitude: 3.3903
+            latitude: 4.87,
+            longitude: 7.15
         };
 
         // calculates the distance between the customers location from the restaurants location

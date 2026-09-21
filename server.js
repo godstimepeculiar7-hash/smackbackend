@@ -443,6 +443,15 @@ app.post('/create-payment', async (req, res) => {
 
         const MAX_DELIVERY_DISTANCE = 5000; // 5 kilometers
 
+
+        if (distance > MAX_DELIVERY_DISTANCE) {
+            return res.status(400).json({
+                success: false,
+                message: 'Sorry, you are outside our delivery area.',
+                distance,
+            })
+        };
+
         const addressResponse = await axios.get(
             'https://nominatim.openstreetmap.org/reverse',
             {
@@ -460,14 +469,6 @@ app.post('/create-payment', async (req, res) => {
 
         const deliveryAddress = addressResponse.data.display_name;
 
-        if (distance > MAX_DELIVERY_DISTANCE) {
-            return res.status(400).json({
-                success: false,
-                message: 'Sorry, you are outside our delivery area.',
-                distance,
-                deliveryAddress
-            })
-        };
 
         res.json({
             success: true,
@@ -482,7 +483,7 @@ app.post('/create-payment', async (req, res) => {
             message: 'Something went wrong'
         });
     }
-})
+});
 
 
 app.listen(PORT, () => {

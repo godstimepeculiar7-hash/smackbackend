@@ -7,8 +7,13 @@ const cors = require('cors');
 const deliveryOptions = require('./data/deliveryOptions');
 const axios = require('axios');
 const geolib = require('geolib');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
+
+app.use(express)
+
+app.use('/auth', authRoutes);
 
 const connectDB = async () => {
     try {

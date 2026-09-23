@@ -11,7 +11,8 @@ const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
-app.use(express)
+app.use(express.json());
+app.use(cors());
 
 app.use('/auth', authRoutes);
 
@@ -29,9 +30,6 @@ connectDB();
 
 const PORT = process.env.PORT || 5000;
 
-
-app.use(express.json());
-app.use(cors());
 
 app.get('/products', async (req, res) => {
     try {

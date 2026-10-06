@@ -192,7 +192,7 @@ router.get('/verify-email', async (req, res) => {
          sameSite: 'none'
       });
 
-      return res.redirect('http://localhost:5000/dashboard');
+      return res.redirect('http://localhost:5173/dashboard');
 
    } catch (error) {
       res.status(500).json({

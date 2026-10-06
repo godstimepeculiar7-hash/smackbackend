@@ -99,7 +99,7 @@ router.post('/register', async (req, res) => {
          verificationTokenExpires: verificationTokenExpires
       });
 
-      const verificationUrl = `http://localhost:5000/auth/verify-email?token=${verificationToken}`;
+      const verificationUrl = `https://smackbackend.onrender.com/auth/verify-email?token=${verificationToken}`;
 
       await sendEmail(
          user.email,
@@ -187,10 +187,12 @@ router.get('/verify-email', async (req, res) => {
       );
 
       res.cookie('token', jwtToken, {
-         httpOnly: true
+         httpOnly: true,
+         secure: true,
+         sameSite: 'none'
       });
 
-      return res.redirect('http://localhost:5173/dashboard');
+      return res.redirect('https://smackbackend.onrender.com/dashboard');
 
    } catch (error) {
       res.status(500).json({
@@ -279,7 +281,7 @@ router.post('/resend-verification', async (req, res) => {
 
       await user.save();
 
-      const verificationUrl = `http://localhost:5000/auth/verify-email?token=${verificationToken}`;
+      const verificationUrl = `https://smackbackend.onrender.com/auth/verify-email?token=${verificationToken}`;
 
       await sendEmail(user.email, 'Verify your SMACK account', `<h1>Welcome to SMACK, ${user.fullName}!</h1>
 

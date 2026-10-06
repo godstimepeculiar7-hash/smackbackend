@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose');
 const Product = require('./models/products');
 const Cart = require('./models/cart');
@@ -12,8 +13,11 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 
 app.use(express.json());
-app.use(cors());
-
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
+app.use(cookieParser());
 app.use('/auth', authRoutes);
 
 const connectDB = async () => {

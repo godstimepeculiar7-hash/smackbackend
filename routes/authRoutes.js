@@ -345,4 +345,99 @@ router.get('/me', async (req, res) => {
    }
 });
 
+router.post('/logout', (req, res) => {
+   res.clearCookie('token');
+
+   return res.status(200).json({
+      message: 'Logged out successfully'
+   });
+});
+
+router.post('/login', async (req, res) => {
+   try {
+      const { email, password } = req.body;
+
+      // 1. Check that both fields were provided
+      if (typeof email !== 'string' || typeof password !== 'string') {
+         return res.status(400).json({
+            message: 'Email and password are required'
+         });
+      }
+
+      // 2. Clean the email
+      const trimmedEmail = email.trim().toLowerCase();
+
+      if (!trimmedEmail || !password) {
+         return res.status(400).json({
+            message: 'Email and password are required'
+         });
+      }
+
+      // 3. Validate the email format
+      if (!validator.isEmail(trimmedEmail)) {
+         return res.status(400).json({
+            message: 'Please provide a valid email address'
+         });
+      }
+
+      // 4. Find the user
+      const user = await User.findOne({
+         email: trimmedEmail
+      });
+
+      if (!user) {
+         return res.status(401).json({
+            message: 'Invalid email or password'
+         });
+      }
+
+      // 5. Compare the password with the hashed password
+      const isPasswordCorrect = await bcrypt.compare(
+         password,
+         user.password
+      );
+
+      if (!isPasswordCorrect) {
+         return res.status(401).json({
+            message: 'Invalid email or password'
+         });
+      }
+
+      // 6. Make sure the user's email has been verified
+      if (!user.isVerified) {
+         return res.status(403).json({
+            message: 'Please verify your email before logging in'
+         });
+      }
+
+      // 7. Create the JWT
+      const jwtToken = jwt.sign(
+         { userId: user._id },
+         process.env.JWT_SECRET
+      );
+
+      // 8. Store the JWT in the HttpOnly cookie
+      res.cookie('token', jwtToken, {
+         httpOnly: true
+      });
+
+      // 9. Send a successful response
+      return res.status(200).json({
+         message: 'Login successful',
+         user: {
+            fullName: user.fullName,
+            email: user.email,
+            isVerified: user.isVerified
+         }
+      });
+
+   } catch (error) {
+      console.log(error);
+
+      return res.status(500).json({
+         message: 'An error occurred while logging in'
+      });
+   }
+});
+
 module.exports = router;
